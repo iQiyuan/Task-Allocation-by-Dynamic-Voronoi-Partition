@@ -1,2 +1,5 @@
-# multi-agent-control
-This is a repository that documents my learning process, where I will complete various multi-agent control practices.
+# Multi-Agent-Control
+The purpose of this repository is to implement several Multi-Agent Controllers, with the primary goal of maintaining a framework for future use.
+
+## Simple Linear Consensus Protocal
+

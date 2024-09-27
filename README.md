@@ -13,6 +13,3 @@ $$
 This simple controller provides a user interface. One can use sliding bar to generate up to 10 agents, and select certain communication network topology accordingly.
 
 ![overview](figure/LCP_GUI.png)
-
-## update test
-GitHub Authentication?

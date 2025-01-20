@@ -11,7 +11,7 @@ pygame.init()
 
 ENV_SIZE = 800
 screen = pygame.display.set_mode((ENV_SIZE, ENV_SIZE))
-pygame.display.set_caption("Multi-Agent Cooperation Simulation - Voronoi")
+pygame.display.set_caption("Weighted VSP-based Task Allocation Simulation - Voronoi")
 clock = pygame.time.Clock()
 
 drone = Drone(0, 0, ENV_SIZE)

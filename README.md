@@ -1,77 +1,43 @@
 # Task Allocation by Dynamic Voronoi Partition
-Motion imitation is a challenging task in robotics and computer vision, typically requiring expert data obtained through MoCap devices. However, acquiring such data is resource-intensive in terms of financial resources, manpower, and time. Our project addresses this challenge by proposing a novel model that simplifies Motion Imitation into a prediction problem of joint angle values in reinforcement learning.
+Task allocation is a critical component of multi-robot collaboration. Among various approaches, space partitioning methods based on Voronoi cells (VSP) offer a straightforward and effective way to assign tasks. However, traditional VSP-based task allocation methods often lack adaptability to dynamic changes in tasks and environments. To address this limitation, our model introduces a task allocation algorithm that leverages vehicle-centered Voronoi region partitioning. By dynamically adjusting the weights of Voronoi cells, this method adapts to environmental and task changes in real time. As a result, it achieves a 17% improvement in efficiency compared to conventional region-based task allocation methods.
 
-| ![details](figure/demo.png) | ![example](figure/example.gif) |
-| --------------------------- | ------------------------------ |
+<div style="display: flex; justify-content: center; align-items: center;">
+    <div style="text-align: center; margin: 10px;">
+        <img src="figure/env.png" alt="details" style="width: 300px; height: auto;">
+        <p>Legend</p>
+    </div>
+    <div style="text-align: center; margin: 10px;">
+        <img src="figure/demo.gif" alt="example" style="width: 300px; height: auto;">
+        <p>Demo</p>
+    </div>
+</div>
 
-# Overall Framework
-The model first extracts motion information represented by skeletal structure from the target human arm motion videos. Then, it retargets the arm motions morphologically to match those of a robotic manipulator, making them essentially equivalent. This facilitates the subsequent generation of reference motions for the robotic manipulator to imitate. The generated reference motions are then utilized to formulate a reinforcement learning problem, enabling the model to learn a policy to imitate human arm motions or apply a learned policy to imitate unfamiliar motions.
+# Model Description
 
-## Installation & Setups
-Clone the repository and cd to Imitation-main directory.
-```bash
-git clone https://github.com/iQiyuan/Imitation.git
-cd Imitation-main
-```
-Install [conda](https://www.anaconda.com/) and create the provided conda virtual environment.
-```bash
-conda env create -f environment.yaml
-conda activate MoIm
-```
-Download the pre-trained model for 3D Human Pose Estimation following the instructions in "Dataset Setup" and "Demo" from this [repository](https://github.com/Vegetebird/StridedTransformer-Pose3D).
+To validate our method, we designed a heterogeneous multi-robot collaborative object retrieval task. The task was simplified into a 2-dimensional space, with different robots represented by simple shapes, as illustrated in the legend above. 
 
-## Extract and Retarget 3D Motions
-Make sure the required pre-trained weights are downloaded and in the correct directory listed below.
-```
-./pose_est/lib/checkpoint/pose_hrnet_w48_384x288.pth
-./pose_est/lib/checkpoint/yolov3.weights
-```
+In our approach, each ground vehicle is treated as the centroid of a Voronoi cell. By dynamically adjusting the weight used in Voronoi cell computation, we modify the boundaries of each Voronoi cell. When a target object enters the search range of a drone, the drone communicates the object's coordinates to the ground vehicle within the corresponding Voronoi cell for task assignment. Thanks to the properties of Voronoi cells, this ensures that each object is assigned to the nearest ground vehicle.
 
-Put the target video under this directory.
-```
-./pose_est/video/target_video_name.mp4 
-```
-Run the below commands to extract skeletal motions and retarget it.
-```bash
-python extract.py --video target_video_name.mp4
-python retarget.py --video target_video_name
-```
-Expected outputs are under this directory.
-```
-./pose_est/output/target_video_name
-./demo_data/target_video_name
-```
+<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
+    <div style="text-align: center;">
+        <img src="figure/example.jpg" alt="Example" style="width: 400px; height: auto;">
+        <p>Voronoi cell shrinks and the surrounding cells compensate the shrinkage area.</p>
+    </div>
+    <div style="text-align: center;">
+        <img src="figure/repulsive.jpg" alt="Repulsive" style="width: 400px; height: auto;">
+        <p>Repulsive force applied when ohther ground vehicle enters collision range.</p>
+    </div>
+</div>
 
-## Train New Imitation Policy
-Although the pre-trained weights are provided, you can always train a new imitation policy using the reference motion extracted in the previous step.
-```bash
-python train.py --GUI True --video target_video_name
-```
+Once a ground vehicle is assigned a task, its Voronoi cell shrinks to a small region around itself. The Voronoi cells of surrounding agents expand correspondingly to fill the newly available space. This mechanism indirectly lowers the task allocation priority of the active ground vehicle, allowing it to focus on delivering the assigned object. Meanwhile, the expanded Voronoi cells increase the likelihood of nearby agents being assigned tasks, effectively raising their task allocation priority.
 
-## Test The Learned Policy
-The extracted reference motions can also be used to test the learned policy, i.e. let the robotic manipulator imitate whatever arm motions demonstrated in the videos.
-```bash
-python test.py --GUI True --video target_video_name
-```
+The reduced Voronoi cell around the active ground vehicle is used solely for collision avoidance. Ground vehicles entering this area experience a repulsive force, ensuring that collisions are prevented.
 
-## Policy Evaluation
-The learned policy can be quantitatively evaluated.
-```bash
-python performance.py
-python evaluate.py --GUI True --video target_video_name
-```
+# Results
 
-# Planned Research Paper
-We are currently preparing a research paper that will provide a detailed explanation of the proposed model, its implementation, experimental results, and future directions. Stay tuned for updates!
+![details](figure/results.png)
 
-# Acknowledgement
-The code for this project is based on modifications made to the following repositories. Thanks to the authors of these repositories for open-sourcing their work.
-
-[OpenAi_baselines](https://github.com/openai/baselines)  
-[PPO_PyTorch](https://github.com/nikhilbarhate99/PPO-PyTorch)  
-[Motion_Imitation](https://github.com/erwincoumans/motion_imitation)  
-[StridedTransformer](https://github.com/Vegetebird/StridedTransformer-Pose3D)  
-[PyBullet_official_e.g.](https://github.com/bulletphysics/bullet3/tree/master)
+Our method significantly enhances delivery performance across multiple metrics. The delivery rate increased by 57.14% (28 to 44 packages per minute), reflecting accelerated task execution, improved productivity, and shorter delivery cycles. Task distribution became 21.71% more balanced, reducing workload variance among vehicles, while the off-task time ratio dropped by 10.38%, meaning vehicles spent more time delivering packages. Box delivery efficiency rose by 8.79% (77.78% to 84.62%), and the average package lifecycle decreased by 26.96% (12.35 to 9.02 seconds), indicating faster turnaround times. Although the average travel distance per vehicle increased by 915.09 pixels (6082.99 to 6998.08), this aligns with heightened activity and resource utilization, as the average number of busy vehicles nearly doubled (1.18 to 2.30, a 94.92% increase). Over time, cumulative delivery data confirmed the strategy's consistent superiority, delivering 16 more packages in one minute, reducing workload variance, and sustaining higher efficiency and engagement. The proposed approach demonstrated robust responsiveness, balance, and efficiency under dynamic conditions, significantly outperforming the conventional method across all metrics.
 
 # License
 This project is licensed under the MIT License - see the LICENSE file for details.

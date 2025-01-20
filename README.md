@@ -1,16 +1,7 @@
 # Task Allocation by Dynamic Voronoi Partition
 Task allocation is a critical component of multi-robot collaboration. Among various approaches, space partitioning methods based on Voronoi cells (VSP) offer a straightforward and effective way to assign tasks. However, traditional VSP-based task allocation methods often lack adaptability to dynamic changes in tasks and environments. To address this limitation, our model introduces a task allocation algorithm that leverages vehicle-centered Voronoi region partitioning. By dynamically adjusting the weights of Voronoi cells, this method adapts to environmental and task changes in real time. As a result, it achieves a 17% improvement in efficiency compared to conventional region-based task allocation methods.
 
-<div style="display: flex; justify-content: center; align-items: center;">
-    <div style="text-align: center; margin: 10px;">
-        <img src="figure/env.png" alt="details" style="width: 300px; height: auto;">
-        <p>Legend</p>
-    </div>
-    <div style="text-align: center; margin: 10px;">
-        <img src="figure/demo.gif" alt="example" style="width: 300px; height: auto;">
-        <p>Demo</p>
-    </div>
-</div>
+![details](figure/env.png)
 
 # Model Description
 
@@ -18,18 +9,11 @@ To validate our method, we designed a heterogeneous multi-robot collaborative ob
 
 In our approach, each ground vehicle is treated as the centroid of a Voronoi cell. By dynamically adjusting the weight used in Voronoi cell computation, we modify the boundaries of each Voronoi cell. When a target object enters the search range of a drone, the drone communicates the object's coordinates to the ground vehicle within the corresponding Voronoi cell for task assignment. Thanks to the properties of Voronoi cells, this ensures that each object is assigned to the nearest ground vehicle.
 
-<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
-    <div style="text-align: center;">
-        <img src="figure/example.jpg" alt="Example" style="width: 400px; height: auto;">
-        <p>Voronoi cell shrinks and the surrounding cells compensate the shrinkage area.</p>
-    </div>
-    <div style="text-align: center;">
-        <img src="figure/repulsive.jpg" alt="Repulsive" style="width: 400px; height: auto;">
-        <p>Repulsive force applied when ohther ground vehicle enters collision range.</p>
-    </div>
-</div>
+![details](figure/example.jpg)
 
 Once a ground vehicle is assigned a task, its Voronoi cell shrinks to a small region around itself. The Voronoi cells of surrounding agents expand correspondingly to fill the newly available space. This mechanism indirectly lowers the task allocation priority of the active ground vehicle, allowing it to focus on delivering the assigned object. Meanwhile, the expanded Voronoi cells increase the likelihood of nearby agents being assigned tasks, effectively raising their task allocation priority.
+
+![details](figure/repulsive.jpg)
 
 The reduced Voronoi cell around the active ground vehicle is used solely for collision avoidance. Ground vehicles entering this area experience a repulsive force, ensuring that collisions are prevented.
 
